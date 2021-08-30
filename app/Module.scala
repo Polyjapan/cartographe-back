@@ -1,4 +1,6 @@
-import com.google.inject.{AbstractModule}
+import com.google.inject.{AbstractModule, Provides}
+import data.static.Maps
+import services.MapsService
 
 import java.time.Clock
 
@@ -17,6 +19,8 @@ class Module extends AbstractModule {
   override def configure() = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+
+    bind(classOf[MapsService]).toInstance(Maps)
   }
 
 }
