@@ -67,7 +67,7 @@ object Maps extends MapsService {
 
     val PublicJsonLayers: List[LayerGroup[MultiDimensionLayer]] = List(
       LayerGroup("Plan Visiteurs", List(
-      MultiDimensionLayer("stands", List("id_pj", "exposant", "type"), style = Some(
+      /*MultiDimensionLayer("stands", List("id_pj", "exposant", "type"), style = Some(
         UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(164,113,88,1.0)"), Map(
           "Associatif" -> ColorFillStyle("rgba(90,211,96,1.0)"),
           "Accueil" -> ColorFillStyle("rgba(213,163,48,1.0)"),
@@ -85,7 +85,7 @@ object Maps extends MapsService {
           "Conférences" -> ColorFillStyle("rgba(198,103,207,1.0)"),
           "Stockage" -> ColorFillStyle("rgba(224,78,20,1.0)"),
         )), LabelTextStyle("Salle {nom_public}\n{type}")))
-      ))
+      ))*/
     ))
     )
 
@@ -96,9 +96,10 @@ object Maps extends MapsService {
     )
 
     val BaseBuildings: List[LayerGroup[MultiDimensionWMSLayer]] = List(LayerGroup("Batiments", List(
-      MultiDimensionWMSLayer(Map("LAYERS" -> "grost{dimension}"), "Aires"),
-      MultiDimensionWMSLayer(Map("LAYERS" -> "batiments{dimension}"), "Bâtiments"),
-      MultiDimensionWMSLayer(Map("LAYERS" -> "locaux_l_01"), "Noms de salles"),
+      MultiDimensionWMSLayer(Map("LAYERS" -> "grost{dimension}"), "Aires", zIndex = -150),
+      MultiDimensionWMSLayer(Map("layer" -> "batiments", "matrixSet" -> "2056", "dimension.floor" -> "{dimension}"), "Bâtiments", zIndex = -100, kind = "WMTS", url = "https://plan-epfl-wmts0.epfl.ch/1.0.0/WMTSCapabilities_2056.xml"),
+      MultiDimensionWMSLayer(Map("LAYERS" -> "locaux_labels,batiments_routes_labels"), "Noms de salles"),
+      //MultiDimensionWMSLayer(Map("LAYERS" -> "locaux_l_01"), "Noms de salles"),
     )))
 
     val BaseGeoPortalData: List[LayerGroup[MultiDimensionWMSLayer]] = List(

@@ -15,7 +15,12 @@ object LayerDef {
     def tblName(dimension: String) = s"${dbGroup}.${tablePrefix}_$dimension"
   }
 
-  case class MultiDimensionWMSLayer(params: Map[String, String], title: String, defaultVisibility: Boolean = true, url: String = "https://geoportail.epfl.ch/prod/wsgi/mapserv_proxy?VERSION=1.3.0&floor={dimension}", dimensions: List[String] = List("0", "1", "2"), dimensionName: String = "Étage") extends Layer {
+  case class MultiDimensionWMSLayer(params: Map[String, String], title: String, defaultVisibility: Boolean = true,
+                                    url: String = "https://geoportail.epfl.ch/prod/wsgi/mapserv_proxy?VERSION=1.3.0&floor={dimension}",
+                                    dimensions: List[String] = List("0", "1", "2"),
+                                    dimensionName: String = "Étage",
+                                    kind: String = "WMS",
+                                    zIndex: Int = 0) extends Layer {
     private val fullParams: Map[String, String] = Map("TILED" -> "true", "VERSION" -> "1.3.0") ++ params
 
     def forDimension(dim: String): MultiDimensionWMSLayer =
