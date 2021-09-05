@@ -6,7 +6,7 @@ import play.api.Configuration
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.{JsArray, JsString, Json}
 import play.api.mvc._
-import services.{GeoJson, LayerReader, MapsService}
+import services.{GeoJson, DatabaseService, MapsService}
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
@@ -19,7 +19,7 @@ import java.time.Clock
  * application's home page.
  */
 @Singleton
-class MapsController @Inject()(cc: ControllerComponents, layerReader: LayerReader, mapsService: MapsService)(implicit ec: ExecutionContext, conf: Configuration, clock: Clock) extends AbstractController(cc) {
+class MapsController @Inject()(cc: ControllerComponents, layerReader: DatabaseService, mapsService: MapsService)(implicit ec: ExecutionContext, conf: Configuration, clock: Clock) extends AbstractController(cc) {
 
   def listMaps: Action[AnyContent] = Action.async { req =>
     mapsService.getMaps.map(lst => lst.filter(map => map.readableBy(req.optUser))).map(lst => Ok(Json.toJson(lst)))

@@ -43,7 +43,7 @@ object Maps extends MapsService {
         MultiDimensionLayer("rallye", List("id"), Some("Panneaux rallye"))
       )),
       LayerGroup("Pro", List(
-        MultiDimensionLayer("stands", List("id_pj", "exposant", "type", "prix", "nb_tables", "nb_chaises", "nb_panneaux", "commentaires", "puissance_elec_requise"), style = Some(
+        MultiDimensionLayer(Tables.Tables("stands"), prettyName = Some("Stands"), dimensionName = "Étages", style = Some(
           UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(164,113,88,1.0)"), Map(
             "Associatif" -> ColorFillStyle("rgba(90,211,96,1.0)"),
             "Accueil" -> ColorFillStyle("rgba(213,163,48,1.0)"),
@@ -51,7 +51,7 @@ object Maps extends MapsService {
             "Commercial" -> ColorFillStyle("rgba(228,68,116,1.0)"),
             "Jeune Créateur" -> ColorFillStyle("rgba(132,77,127,1.0)"),
             "Contrepartie Prestataire/Invité" -> ColorFillStyle("rgba(156,122,37,1.0)"),
-          )), LabelTextStyle("Stand {id_pj}\nExposant: {exposant}\n{nb_tables} tables", offsetX = -35)))
+          )), LabelTextStyle("{id_pj}\n{exposant}\n{nb_tables} tables", offsetX = -35)))
         )),
         MultiDimensionLayer("salles", List("nom_public", "type", "commentaires", "puissance_elec_requise", "max_personnes"), style = Some(
           UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(209,86,33,1.0)"), Map(
@@ -60,7 +60,7 @@ object Maps extends MapsService {
             "Concerts" -> ColorFillStyle("rgba(173,71,105,1.0)"),
             "Conférences" -> ColorFillStyle("rgba(198,103,207,1.0)"),
             "Stockage" -> ColorFillStyle("rgba(224,78,20,1.0)"),
-          )), LabelTextStyle("Salle {nom_public}\n{type}\nMax {max_personnes} personnes")))
+          )), LabelTextStyle("{nom_public}\n{type}")))
         ))
       ))
     )
@@ -143,5 +143,5 @@ object Maps extends MapsService {
    * @param mapId
    * @return
    */
-override def getJsonLayers(mapId: Int): Future[Option[(MapDef, List[LayerGroup[MultiDimensionLayer]])]] = Future.successful(this.Maps.get(mapId).map(triple => (triple._1, triple._2)))
+  override def getJsonLayers(mapId: Int): Future[Option[(MapDef, List[LayerGroup[MultiDimensionLayer]])]] = Future.successful(this.Maps.get(mapId).map(triple => (triple._1, triple._2)))
 }

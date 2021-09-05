@@ -8,11 +8,25 @@ import play.shaded.ahc.org.asynchttpclient.request.body.multipart.MultipartUtils
 object LayerDef {
   sealed trait Layer
 
-  case class MultiDimensionLayer(tablePrefix: String, attributes: List[String], prettyName: Option[String] = None,
-                                 dimensions: List[String] = List("0", "1", "2"), dimensionName: String = "Étage",
-                                 geometryColumn: String = "geom",
-                                 dbGroup: String = "ji_2022", style: Option[Styles.Style] = None) extends Layer {
+  case class TableDef(tablePrefix: String, columns: List[String], dimensions: List[String] = List("0", "1", "2"),
+                                          geometryColumn: String = "geom", dbGroup: String = "ji_2022") {
     def tblName(dimension: String) = s"${dbGroup}.${tablePrefix}_$dimension"
+
+  }
+
+
+  case class MultiDimensionLayer(table: TableDef, prettyName: Option[String], dimensionName: String,
+                                 style: Option[Styles.Style]) extends Layer
+
+  object MultiDimensionLayer {
+    def apply(tablePrefix: String, attributes: List[String], prettyName: Option[String] = None,
+              dimensions: List[String] = List("0", "1", "2"), dimensionName: String = "Étage",
+              geometryColumn: String = "geom",
+              dbGroup: String = "ji_2022", style: Option[Styles.Style] = None): MultiDimensionLayer = {
+      val table = TableDef(tablePrefix, attributes, dimensions, geometryColumn, dbGroup)
+
+      MultiDimensionLayer(table, prettyName, dimensionName, style)
+    }
   }
 
   case class MultiDimensionWMSLayer(params: Map[String, String], title: String, defaultVisibility: Boolean = true,

@@ -7,7 +7,7 @@ import pdi.jwt.JwtSession
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
-import services.LayerReader
+import services.DatabaseService
 
 import java.time.Clock
 import javax.inject.Inject

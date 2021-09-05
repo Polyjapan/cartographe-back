@@ -1,6 +1,6 @@
 import com.google.inject.{AbstractModule, Provides}
-import data.static.Maps
-import services.MapsService
+import data.static.{Maps, Tables}
+import services.{MapsService, TablesService}
 
 import java.time.Clock
 
@@ -20,6 +20,7 @@ class Module extends AbstractModule {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
     bind(classOf[MapsService]).toInstance(Maps)
+    bind(classOf[TablesService]).toInstance(Tables)
   }
 
 }

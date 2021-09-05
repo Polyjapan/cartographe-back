@@ -4,7 +4,11 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /maps                           controllers.MapsController.listMaps
-GET     /wms/:map/:dimension                           controllers.MapsController.wmsForDimension(map: Int, dimension: String)
-GET     /json/:map/:dimension                           controllers.MapsController.dataForDimension(map: Int, dimension: String)
-GET     /login/:ticket              controllers.LoginController.login(ticket: String)
+GET          /maps                                                 controllers.MapsController.listMaps
+GET          /wms/:map/:dimension                                  controllers.MapsController.wmsForDimension(map: Int, dimension: String)
+GET          /json/:map/:dimension                                 controllers.MapsController.dataForDimension(map: Int, dimension: String)
+GET          /login/:ticket                                        controllers.LoginController.login(ticket: String)
+
++nocsrf
+PATCH        /data/:table/:dimension/:id        controllers.DataController.updateEntity(table: String, dimension: String, id: Int)
+GET          /data/:table                      controllers.DataController.getEntities(table: String)
