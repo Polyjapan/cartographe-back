@@ -35,7 +35,3 @@ javaOptions in Universal ++= Seq(
 dockerExposedPorts := Seq(80)
 dockerUsername := Some("polyjapan")
 dockerBaseImage := "openjdk:11"
-
-// Don't add the doc in the zip
-publishArtifact in(Compile, packageDoc) := false
-      

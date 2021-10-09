@@ -1,7 +1,7 @@
 package data.static
 
 import data.LayerDef.{LayerGroup, MapDef, MultiDimensionLayer, MultiDimensionWMSLayer}
-import data.Styles.{AttributeBasedStyle, ColorFillStyle, LabelTextStyle, UnionStyle}
+import data.Styles.{AttributeBasedStyle, ColorFillStyle, Expression, LabelTextStyle, UnionStyle}
 import services.MapsService
 
 import scala.collection.mutable
@@ -51,7 +51,7 @@ object Maps extends MapsService {
             "Commercial" -> ColorFillStyle("rgba(228,68,116,1.0)"),
             "Jeune Créateur" -> ColorFillStyle("rgba(132,77,127,1.0)"),
             "Contrepartie Prestataire/Invité" -> ColorFillStyle("rgba(156,122,37,1.0)"),
-          )), LabelTextStyle("{id_pj}\n{exposant}\n{nb_tables} tables", offsetX = -35)))
+          )), LabelTextStyle(Expression.fromCode("concat(\"id_pj\", '\\n', IF(\"exposant\" IS NULL, '** LIBRE **', \"exposant\"), '\\n', IF(\"nb_tables\" IS NULL, '?', \"nb_tables\"), 't', IF(\"nb_chaises\" IS NULL, '?', \"nb_chaises\"), 'c', IF(\"nb_panneaux\" IS NULL, '?', \"nb_chaises\"), 'p')"), offsetX = -35)))
         )),
         MultiDimensionLayer("salles", List("nom_public", "type", "commentaires", "puissance_elec_requise", "max_personnes"), style = Some(
           UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(209,86,33,1.0)"), Map(
@@ -60,7 +60,7 @@ object Maps extends MapsService {
             "Concerts" -> ColorFillStyle("rgba(173,71,105,1.0)"),
             "Conférences" -> ColorFillStyle("rgba(198,103,207,1.0)"),
             "Stockage" -> ColorFillStyle("rgba(224,78,20,1.0)"),
-          )), LabelTextStyle("{nom_public}\n{type}")))
+          )), LabelTextStyle(Expression.fromCode("""concat(if ("nom_public" is not null, "nom_public", '[sans nom]'), if("type" is not null, concat(' (', "type", ')'), ''), '\nEnv. ', round($area, -1), ' m²', if ("max_personnes" is not null, concat('\n', "max_personnes", ' p. max'), ''))"""))))
         ))
       ))
     )

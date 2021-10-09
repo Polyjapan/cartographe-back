@@ -2,11 +2,13 @@ package controllers
 
 import data.LayerDef
 import data.LayerDef._
+import data.Styles.{AttributeBasedStyle, AttributeBasedStyleWriter, CodeExpression, ColorFillStyle, ColorFillStyleWriter, Expression, LabelTextStyle, LabelTextStyleWriter, LineFillStyle, LineFillStyleWriter, Style, UnionStyle, UnionStyleWriter}
 import play.api.Configuration
+import play.api.http.MimeTypes
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.{JsArray, JsString, Json}
 import play.api.mvc._
-import services.{GeoJson, DatabaseService, MapsService}
+import services.{DatabaseService, GeoJson, MapsService}
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,26 +27,85 @@ class MapsController @Inject()(cc: ControllerComponents, layerReader: DatabaseSe
     mapsService.getMaps.map(lst => lst.filter(map => map.readableBy(req.optUser))).map(lst => Ok(Json.toJson(lst)))
   }
 
-  /**
-   * Create an Action to render an HTML page with a welcome message.
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/`.
-   */
-  def index = TODO
-    /*db.withConnection(implicit c => {
-      val res = SQL("SELECT geom FROM ji_2022.stands_1 LIMIT 1").as(get[PGgeometry]("geom").single)
-      println(res)
+  /*
+  // This is a version with access control.
+  // I don't think the formatting rules themselves should be secret, and so I think protecting them is not worth
+  // the loss in performance (non cachable)
+  def getExpressions: Action[AnyContent] = Action.async { req =>
+    def extractExpressions(style: Style): List[Expression] = style match {
+      case c: ColorFillStyle => List(c.color)
+      case a: AttributeBasedStyle => a.mapping.values.flatMap(extractExpressions).toList
+      case a: LineFillStyle => List()
+      case a: LabelTextStyle => List(a.color, a.content, a.font)
+      case a: UnionStyle => a.styles.flatMap(extractExpressions)
+    }
 
-      res.getGeometry match {
-        case poly: Polygon =>
-          println(poly.getFirstPoint)
+    mapsService.getMaps
+      .flatMap { maps =>
+        Future.sequence(maps.map(map => this.mapsService.getJsonLayers(map.mapId).map(layers => (map, layers))))
       }
-    })
+      .map { lst =>
+        lst
+          .filter(map => map._1.readableBy(req.optUserWithCookies))
+          .flatMap {
+            case (_, Some((_, layers))) =>
+              val functions = layers
+                .flatMap(group => group.layers)
+                .flatMap(layer => layer.style)
+                .flatMap(extractExpressions)
+                .filter {
+                  case _: CodeExpression => true
+                  case _ => false
+                }
+                .toSet
 
-    Ok(views.html.index("Your new application is ready."))*/
-    // layerReader.readAllDimensionsFromGroups(LayerDef.Layers).map(lst => Ok(Json.toJson(lst)))
+              functions.map {
+                case c: CodeExpression => c.compiledCode
+              }
+            case _ => List()
+          }
+      }
+      .map(lst => Ok(lst.mkString("\n\n")).as(MimeTypes.JAVASCRIPT).withHeaders("Cache-Control" -> "no-store"))
+  }
+   */
 
+  def getExpressions: Action[AnyContent] = Action.async { req =>
+    def extractExpressions(style: Style): List[Expression] = style match {
+      case c: ColorFillStyle => List(c.color)
+      case a: AttributeBasedStyle => a.mapping.values.flatMap(extractExpressions).toList
+      case a: LineFillStyle => List()
+      case a: LabelTextStyle => List(a.color, a.content, a.font)
+      case a: UnionStyle => a.styles.flatMap(extractExpressions)
+    }
+
+    mapsService.getMaps
+      .flatMap { maps =>
+        Future.sequence(maps.map(map => this.mapsService.getJsonLayers(map.mapId).map(layers => (map, layers))))
+      }
+      .map { lst =>
+        lst
+          .flatMap {
+            case (_, Some((_, layers))) =>
+              val functions = layers
+                .flatMap(group => group.layers)
+                .flatMap(layer => layer.style)
+                .flatMap(extractExpressions)
+                .filter {
+                  case _: CodeExpression => true
+                  case _ => false
+                }
+                .toSet
+
+              functions.map {
+                case c: CodeExpression => c.compiledCode
+              }
+            case _ => List()
+          }
+      }
+      .map(lst => Ok(lst.mkString("\n\n"))
+        .as(MimeTypes.JAVASCRIPT)
+        .withHeaders("Cache-Control" -> "public, max-age=86400"))
+  }
 
   def wmsForDimension(map: Int, dimension: String) = Action.async { req =>
     this.mapsService.getBaseLayers(map)

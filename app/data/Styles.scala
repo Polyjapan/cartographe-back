@@ -1,13 +1,44 @@
 package data
 
 import play.api.libs.json.{JsString, JsValue, Json, OWrites, Writes}
+import qgis.expressions.QgsCompiler
+
+import scala.language.implicitConversions
 
 object Styles {
+  private var FuncNumber = 0
+
+  sealed trait Expression
+  case class SimpleExpression(value: String) extends Expression
+  case class CodeExpression(funcName: String, compiledCode: String) extends Expression
+
+  object Expression {
+    def fromCode(code: String): Expression = {
+      val fname = f"lyr_func_$FuncNumber"
+      FuncNumber = FuncNumber + 1
+      QgsCompiler(fname, code) match {
+        case Some(jsCode) => CodeExpression(fname, jsCode)
+        case None => SimpleExpression("Compile error")
+      }
+    }
+  }
+
+  implicit def stringToExpr(s: String): Expression = SimpleExpression(s)
+
+  implicit val expressionWriter: Writes[Expression] = (o: Expression) => {
+    val (value, typ: String) = o match {
+      case ex: SimpleExpression => (JsString(ex.value), "simple")
+      case ex: CodeExpression => (JsString(ex.funcName), "code")
+    }
+
+    Json.obj("value" -> value, "exprType" -> JsString(typ))
+  }
+
   sealed trait Style {
     val styleType: String;
   }
 
-  case class ColorFillStyle(color: String) extends Style {
+  case class ColorFillStyle(color: Expression) extends Style {
     override val styleType: String = "color";
   }
 
@@ -19,8 +50,9 @@ object Styles {
     override val styleType: String = "attributeBased";
   }
 
-  case class LabelTextStyle(content: String, offsetX: Int = 0, offsetY: Int = 0,
-                            font: String = "12.5px \\'Open Sans\\', sans-serif", color: String = "#323232", overflow: Boolean = false) extends Style {
+  case class LabelTextStyle(content: Expression = "Missing text", offsetX: Int = 0, offsetY: Int = 0,
+                            font: Expression = "12.5px \\'Open Sans\\', sans-serif", color: Expression = "#323232",
+                            overflow: Boolean = false) extends Style {
     override val styleType: String = "label"
   }
 
