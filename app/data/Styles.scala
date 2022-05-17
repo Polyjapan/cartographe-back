@@ -51,7 +51,7 @@ object Styles {
   }
 
   case class LabelTextStyle(content: Expression = "Missing text", offsetX: Int = 0, offsetY: Int = 0,
-                            font: Expression = "12.5px \\'Open Sans\\', sans-serif", color: Expression = "#323232",
+                            font: Expression = "10px \\'Open Sans\\', sans-serif", color: Expression = "#323232",
                             overflow: Boolean = false) extends Style {
     override val styleType: String = "label"
   }

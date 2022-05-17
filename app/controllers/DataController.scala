@@ -1,7 +1,7 @@
 package controllers
 
 import ch.japanimpact.auth.api.apitokens.AuthorizationActions
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
@@ -17,6 +17,9 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 @Singleton
 class DataController @Inject()(cc: ControllerComponents, dbService: DatabaseService, tblService: TablesService, auth: AuthorizationActions)(implicit ec: ExecutionContext, conf: Configuration, clock: Clock) extends AbstractController(cc) {
+  // TODO: take event as parameter!
+  private val LOG = Logger("DataController")
+
   def updateEntity(table: String, dimension: String, id: Int) = auth().async(parse.json[JsObject]) { implicit req: auth.AuthorizedRequest[JsObject] =>
     tblService.getTable(table).map {
       case Some(tbl) if tbl.dimensions.contains(dimension) =>
@@ -24,6 +27,8 @@ class DataController @Inject()(cc: ControllerComponents, dbService: DatabaseServ
         val updates = req.body.fields
           .filter(pair => tbl.columns.contains(pair._1)) // only keep declared columns
           .filter(pair => req.principal.hasScope("plans/write/" + table + "/" + pair._1)) // check if user has right to write
+
+        LOG.info(f"Updating entity $table $id with $updates")
 
         if (updates.nonEmpty)
           dbService.update(table, id, updates.toSeq)

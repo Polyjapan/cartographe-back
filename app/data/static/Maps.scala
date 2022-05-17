@@ -1,7 +1,7 @@
 package data.static
 
 import data.LayerDef.{LayerGroup, MapDef, MultiDimensionLayer, MultiDimensionWMSLayer}
-import data.Styles.{AttributeBasedStyle, ColorFillStyle, Expression, LabelTextStyle, UnionStyle}
+import data.Styles.{AttributeBasedStyle, ColorFillStyle, Expression, LabelTextStyle, LineFillStyle, UnionStyle}
 import services.MapsService
 
 import scala.collection.mutable
@@ -22,9 +22,23 @@ object Maps extends MapsService {
 
     val PrivateJsonLayers: List[LayerGroup[MultiDimensionLayer]] = List(
       LayerGroup("Sécurité", List(
-        MultiDimensionLayer("barrieres", List("type", "commentaires"), Some("Barrières")),
-        MultiDimensionLayer("postes_securitas", List("id_pj", "mission", "type_agent", "commentaires"), Some("Agents de sécurité")),
-
+        MultiDimensionLayer("barrieres", List("type", "commentaires"), Some("Barrières"), style = Some(
+          AttributeBasedStyle("type", ColorFillStyle(""), Map(
+            "Vauban" -> LineFillStyle("#1f0838", 2),
+            "Vauban+Rubalise" -> LineFillStyle("#ba0000", 1),
+            "Jacquet" -> LineFillStyle("#f7898a", 3),
+          ))
+        )),
+        /* MultiDimensionLayer("structures_ext", List("type", "utilisation", "détails"), Some("Structures Extérieures"), dimensions = List("1"), style = Some(
+          UnionStyle(List(
+            AttributeBasedStyle("type", ColorFillStyle("#aa8ad20d"), Map("" +
+              "Table" -> ColorFillStyle("#aa2adfc7"),
+              "Portiques Balelec" -> ColorFillStyle("#aad336c1"),
+              "Tente" -> ColorFillStyle("#aa8a65ca"),
+              "Chalet" -> ColorFillStyle("#aae8a63b")
+            ))
+          ))
+        ))*/
       )),
       LayerGroup("Décoration", List(
         MultiDimensionLayer("deco_baches", List("nombre", "motif"), Some("Baches")),
@@ -51,7 +65,7 @@ object Maps extends MapsService {
             "Commercial" -> ColorFillStyle("rgba(228,68,116,1.0)"),
             "Jeune Créateur" -> ColorFillStyle("rgba(132,77,127,1.0)"),
             "Contrepartie Prestataire/Invité" -> ColorFillStyle("rgba(156,122,37,1.0)"),
-          )), LabelTextStyle(Expression.fromCode("concat(\"id_pj\", '\\n', IF(\"exposant\" IS NULL, '** LIBRE **', \"exposant\"), '\\n', IF(\"nb_tables\" IS NULL, '?', \"nb_tables\"), 't', IF(\"nb_chaises\" IS NULL, '?', \"nb_chaises\"), 'c', IF(\"nb_panneaux\" IS NULL, '?', \"nb_chaises\"), 'p')"), offsetX = -35)))
+          )), LabelTextStyle(Expression.fromCode("concat(\"id_pj\", '\\n', IF(\"exposant\" IS NULL, '** LIBRE **', \"exposant\"), '\\n', IF(\"nb_tables\" IS NULL, '?', \"nb_tables\"), 't', IF(\"nb_chaises\" IS NULL, '?', \"nb_chaises\"), 'c', IF(\"nb_panneaux\" IS NULL, '?', \"nb_chaises\"), 'p')"))))
         )),
         MultiDimensionLayer("salles", List("nom_public", "type", "commentaires", "puissance_elec_requise", "max_personnes"), style = Some(
           UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(209,86,33,1.0)"), Map(
@@ -75,7 +89,7 @@ object Maps extends MapsService {
           "Commercial" -> ColorFillStyle("rgba(228,68,116,1.0)"),
           "Jeune Créateur" -> ColorFillStyle("rgba(132,77,127,1.0)"),
           "Contrepartie Prestataire/Invité" -> ColorFillStyle("rgba(156,122,37,1.0)"),
-        )), LabelTextStyle("Stand {id_pj}\nExposant: {exposant}", offsetX = -35)))
+        )), LabelTextStyle("Stand {id_pj}\nExposant: {exposant}")))
       )),
       MultiDimensionLayer("salles", List("nom_public", "type"), style = Some(
         UnionStyle(List(AttributeBasedStyle("type", ColorFillStyle("rgba(209,86,33,1.0)"), Map(
@@ -86,6 +100,15 @@ object Maps extends MapsService {
           "Stockage" -> ColorFillStyle("rgba(224,78,20,1.0)"),
         )), LabelTextStyle("Salle {nom_public}\n{type}")))
       ))*/
+    ))
+    )
+
+    val ProJsonLayers: List[LayerGroup[MultiDimensionLayer]] = List(
+      LayerGroup("Plan Pro", List(
+      MultiDimensionLayer("stands", List("id_pj", "exposant", "type", "link"), style = Some(
+        UnionStyle(List(ColorFillStyle(Expression.fromCode("""if ("exposant" is not null or "type" = 'Bar' or "type" = 'Accueil', 'red', 'green')""")),
+          LabelTextStyle(Expression.fromCode("\"id_pj\" || if (\"exposant\" is not null or \"type\" = 'Bar' or \"type\" = 'Accueil', '', '\\n* Libre *')"), font = "12px \\'Open Sans\\', sans-serif")))
+      ))
     ))
     )
 
@@ -116,6 +139,7 @@ object Maps extends MapsService {
     )
 
     register("Plan visiteurs", "Plan public à destination des visiteurs", Set(), PublicJsonLayers, BaseBuildings)
+    register("Plan pro (comité)", "Plan pour les screenshots des pro", Set("comite-ji"), ProJsonLayers, BaseBuildings)
     register("Plan complet (comité)", "Plan complet à destination des membres du comité, contient des informations confidentielles", Set("comite-ji"), PrivateJsonLayers, BaseBuildings ++ BaseGeoPortalData)
     register("Plan staffs", "Plan à destination des membres du staff, contient le plan public ainsi que les postes staff", Set("comite-ji", "staff-ji"), PublicJsonLayers ++ StaffJsonLayer, BaseBuildings)
 

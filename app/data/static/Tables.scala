@@ -22,5 +22,3 @@ object Tables extends TablesService {
 
   def getTable(table: String): Future[Option[TableDef]] = Future.successful(Tables.get(table))
 }
-// https://docs.google.com/spreadsheets/d/1c93ckJS3DR0FY_PoxF5g3w2vhpxg2n_q6r5yI3VJYfA/edit#gid=1125647344&range=E13
-// https://docs.google.com/spreadsheets/d/1c93ckJS3DR0FY_PoxF5g3w2vhpxg2n_q6r5yI3VJYfA/edit

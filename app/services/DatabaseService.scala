@@ -6,8 +6,8 @@ import data.LayerDef.{Feature, LayerData, LayerGroup, MultiDimensionLayer}
 import play.api.db.Database
 import play.api.libs.json.{JsBoolean, JsNumber, JsString, JsValue}
 import services.PostGisDatabaseHelper._
-import scala.collection.immutable.Seq
 
+import scala.collection.immutable.Seq
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -25,7 +25,6 @@ class DatabaseService @Inject()(db: Database)(implicit ec: ExecutionContext) {
     db.withConnection(implicit conn => {
       val req = pairs.map(_._1).map(t => s"$t = {$t}").mkString(", ")
       val params: Seq[NamedParameter] = pairs.map(pair => unpackParameter(pair._1, pair._2)) :+ NamedParameter("int.id", id)
-
 
       SQL("UPDATE " + table + " SET " + req + " WHERE id = {int.id}")
         .on(params :_*)

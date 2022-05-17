@@ -1,7 +1,7 @@
 name := "Cartographe"
  
-version := "0.1.5"
-      
+version := "0.1.14"
+
 lazy val `cartographe` = (project in file(".")).enablePlugins(PlayScala, JavaServerAppPackaging, DockerPlugin)
 
       
@@ -33,5 +33,6 @@ javaOptions in Universal ++= Seq(
 )
 
 dockerExposedPorts := Seq(80)
-dockerUsername := Some("polyjapan")
 dockerBaseImage := "openjdk:11"
+
+Docker / dockerRepository := Some("registry.japan-impact.ch")

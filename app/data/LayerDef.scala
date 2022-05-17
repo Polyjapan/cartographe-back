@@ -1,9 +1,7 @@
 package data
 
-import data.Styles.{AttributeBasedStyle, ColorFillStyle, LabelTextStyle, LabelTextStyleWriter, UnionStyle}
 import org.postgis.{Geometry, Point, Polygon}
 import play.api.libs.json.{JsArray, JsNumber, JsString, JsValue, Json, OWrites, Writes}
-import play.shaded.ahc.org.asynchttpclient.request.body.multipart.MultipartUtils
 
 object LayerDef {
   sealed trait Layer
@@ -13,7 +11,6 @@ object LayerDef {
     def tblName(dimension: String) = s"${dbGroup}.${tablePrefix}_$dimension"
 
   }
-
 
   case class MultiDimensionLayer(table: TableDef, prettyName: Option[String], dimensionName: String,
                                  style: Option[Styles.Style]) extends Layer
