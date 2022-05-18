@@ -1,7 +1,7 @@
 package data.static
 
 import data.LayerDef.{LayerGroup, MapDef, MultiDimensionLayer, MultiDimensionWMSLayer}
-import data.Styles.{AttributeBasedStyle, ColorFillStyle, Expression, LabelTextStyle, LineFillStyle, UnionStyle}
+import data.Styles.{AttributeBasedStyle, CircleStyle, ColorFillStyle, Expression, LabelTextStyle, LineFillStyle, UnionStyle}
 import services.MapsService
 
 import scala.collection.mutable
@@ -51,7 +51,7 @@ object Maps extends MapsService {
         MultiDimensionLayer("gaz_stockage", List("nom", "commentaires"), Some("Stockage Gaz")),
       )),
       LayerGroup("Staff", List(
-        MultiDimensionLayer("postes_staffs", List("nom_poste", "type_poste", "niveau_min", "nb_staffs", "commentaires"), Some("Postes Staffs"))
+        MultiDimensionLayer("postes_staffs", List("nom_poste", "type_poste", "nb_staffs", "niveau_min", "commentaires"), Some("Postes Staffs")),
       )),
       LayerGroup("Rallye", List(
         MultiDimensionLayer("rallye", List("id"), Some("Panneaux rallye"))
@@ -114,7 +114,9 @@ object Maps extends MapsService {
 
     val StaffJsonLayer = List(
       LayerGroup("Staff", List(
-        MultiDimensionLayer("postes_staffs", List("nom_poste", "type_poste", "nb_staffs"), Some("Postes Staffs"))
+        MultiDimensionLayer("postes_staffs", List("nom_poste", "type_poste", "nb_staffs"), Some("Postes Staffs"), style = Some(
+          CircleStyle(fill = Some(ColorFillStyle("rgba(224,78,20,1.0)")), stroke = Some(LineFillStyle("#1f0838", 1)), radius = 5)
+        ))
       ))
     )
 

@@ -1,6 +1,6 @@
 name := "Cartographe"
  
-version := "0.1.14"
+version := "0.1.16"
 
 lazy val `cartographe` = (project in file(".")).enablePlugins(PlayScala, JavaServerAppPackaging, DockerPlugin)
 

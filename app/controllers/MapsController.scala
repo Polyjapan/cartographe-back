@@ -2,7 +2,7 @@ package controllers
 
 import data.LayerDef
 import data.LayerDef._
-import data.Styles.{AttributeBasedStyle, AttributeBasedStyleWriter, CodeExpression, ColorFillStyle, ColorFillStyleWriter, Expression, LabelTextStyle, LabelTextStyleWriter, LineFillStyle, LineFillStyleWriter, Style, UnionStyle, UnionStyleWriter}
+import data.Styles.{AttributeBasedStyle, AttributeBasedStyleWriter, CircleStyle, CodeExpression, ColorFillStyle, ColorFillStyleWriter, Expression, LabelTextStyle, LabelTextStyleWriter, LineFillStyle, LineFillStyleWriter, Style, UnionStyle, UnionStyleWriter}
 import play.api.Configuration
 import play.api.http.MimeTypes
 import play.api.libs.json.Format.GenericFormat
@@ -72,10 +72,11 @@ class MapsController @Inject()(cc: ControllerComponents, layerReader: DatabaseSe
   def getExpressions: Action[AnyContent] = Action.async { req =>
     def extractExpressions(style: Style): List[Expression] = style match {
       case c: ColorFillStyle => List(c.color)
+      case c: CircleStyle if c.fill.isDefined => extractExpressions(c.fill.get)
       case a: AttributeBasedStyle => a.mapping.values.flatMap(extractExpressions).toList
-      case a: LineFillStyle => List()
       case a: LabelTextStyle => List(a.color, a.content, a.font)
       case a: UnionStyle => a.styles.flatMap(extractExpressions)
+      case other => List()
     }
 
     mapsService.getMaps

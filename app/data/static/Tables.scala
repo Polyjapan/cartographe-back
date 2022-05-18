@@ -13,7 +13,7 @@ object Tables extends TablesService {
     def register(td: TableDef) = map.put(td.tablePrefix, td)
 
     register(TableDef("stands", List("id_pj", "exposant", "type", "prix", "nb_tables", "nb_chaises", "nb_panneaux", "commentaires", "puissance_elec_requise", "link")))
-
+    register(TableDef("postes_staffs", List("nom_poste", "type_poste", "nb_staffs", "niveau_min", "commentaires")))
 
     map.toMap
   }

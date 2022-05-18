@@ -46,6 +46,14 @@ object Styles {
     override val styleType: String = "line";
   }
 
+  case class CircleStyle(radius: Int, stroke: Option[LineFillStyle] = None, fill: Option[ColorFillStyle] = None) extends Style {
+    override val styleType: String = "circle";
+  }
+
+  case class IconStyle(src: String) extends Style {
+    override val styleType: String = "icon";
+  }
+
   case class AttributeBasedStyle(attribute: String, `default`: Style, mapping: Map[String, Style]) extends Style {
     override val styleType: String = "attributeBased";
   }
@@ -67,6 +75,8 @@ object Styles {
       case a: LineFillStyle => LineFillStyleWriter.writes(a)
       case a: LabelTextStyle => LabelTextStyleWriter.writes(a)
       case a: UnionStyle => UnionStyleWriter.writes(a)
+      case a: CircleStyle => CircleStyleWriter.writes(a)
+      case a: IconStyle => IconStyleWriter.writes(a)
     }
     jsObject + ("styleType" -> JsString(o.styleType))
   }
@@ -76,5 +86,7 @@ object Styles {
   implicit val LabelTextStyleWriter: OWrites[LabelTextStyle] = Json.writes[LabelTextStyle]
   implicit val UnionStyleWriter: OWrites[UnionStyle] = Json.writes[UnionStyle]
   implicit val AttributeBasedStyleWriter: OWrites[AttributeBasedStyle] = Json.writes[AttributeBasedStyle]
+  implicit val CircleStyleWriter: OWrites[CircleStyle] = Json.writes[CircleStyle]
+  implicit val IconStyleWriter: OWrites[IconStyle] = Json.writes[IconStyle]
 
 }
