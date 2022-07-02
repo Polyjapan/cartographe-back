@@ -1,29 +1,36 @@
 package controllers
 
-import ch.japanimpact.auth.api.UsersApi
+import akka.http.scaladsl.util.FastFuture.successful
 import ch.japanimpact.auth.api.cas.CASService
 import data.UserSession
 import pdi.jwt.JwtSession
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
-import services.DatabaseService
+import services.StaffsService
 
 import java.time.Clock
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class LoginController @Inject()(cc: ControllerComponents, cas: CASService)(implicit ec: ExecutionContext, clock: Clock, config: Configuration) extends AbstractController(cc) {
+class LoginController @Inject()(cc: ControllerComponents, cas: CASService, staffs: StaffsService)(implicit ec: ExecutionContext, clock: Clock, config: Configuration) extends AbstractController(cc) {
 
   def login(token: String) = Action.async {
-    cas.proxyValidate(token, None) map {
+    cas.proxyValidate(token, None) flatMap {
       case Left(err) =>
-        BadRequest(Json.obj("error" -> err.errorType.toString, "message" -> err.message))
+        Future successful BadRequest(Json.obj("error" -> err.errorType.toString, "message" -> err.message))
       case Right(data) =>
-        val session: JwtSession = JwtSession() + ("user", UserSession(data))
+        val user =  UserSession(data)
 
-        Ok(Json.toJson(Json.obj("session" -> session.serialize)))
+        staffs.isStaff(data.user.toInt) map { isStaff =>
+          if (isStaff) user.copy(groups = user.groups + "internal__staff")
+          else user
+        } map { user =>
+          val session: JwtSession = JwtSession() + ("user", user)
+          Ok(Json.toJson(Json.obj("session" -> session.serialize)))
+        }
+
     }
   }
 

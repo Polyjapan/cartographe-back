@@ -143,7 +143,7 @@ object Maps extends MapsService {
     register("Plan visiteurs", "Plan public à destination des visiteurs", Set(), PublicJsonLayers, BaseBuildings)
     register("Plan pro (comité)", "Plan pour les screenshots des pro", Set("comite-ji"), ProJsonLayers, BaseBuildings)
     register("Plan complet (comité)", "Plan complet à destination des membres du comité, contient des informations confidentielles", Set("comite-ji"), PrivateJsonLayers, BaseBuildings ++ BaseGeoPortalData)
-    register("Plan staffs", "Plan à destination des membres du staff, contient le plan public ainsi que les postes staff", Set("comite-ji", "staff-ji"), PublicJsonLayers ++ StaffJsonLayer, BaseBuildings)
+    register("Plan staffs", "Plan à destination des membres du staff, contient le plan public ainsi que les postes staff", Set("comite-ji", "staff-ji", "internal__staff"), PublicJsonLayers ++ StaffJsonLayer, BaseBuildings)
 
     map.toMap
   }
